@@ -16,9 +16,8 @@ class Map(private val context: Context, private val mapDirectoryPath: String) {
         val provincesPath = mapDirectoryPath.plus("Provinces")
         context.resources.assets.open(provincesPath).bufferedReader().forEachLine { line ->
             val parts = line.split(',')
-            val id = parts[0].toInt()
-            val name = parts[1]
-            provinces.add(Province(id, name))
+            val name = parts[0]
+            provinces.add(Province(name))
         }
     }
 
@@ -37,10 +36,9 @@ class Map(private val context: Context, private val mapDirectoryPath: String) {
         val empiresPath = mapDirectoryPath.plus("Empires")
         context.resources.assets.open(empiresPath).bufferedReader().forEachLine { line ->
             val parts = line.split(',')
-            val empireId = parts[0].toInt()
-            val name = parts[1]
-            val provinceId = parts[2].toInt()
-            val empire = Empire(empireId, name)
+            val name = parts[0]
+            val provinceId = parts[1].toInt()
+            val empire = Empire(name)
             empires.add(empire)
             provinces[provinceId].empire = empire
         }
