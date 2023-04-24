@@ -1,21 +1,22 @@
 package com.example.global_conquest
 
-class Empire(private val name: String) {
-    private var gold = 20
+private const val STARTING_GOLD = 20
+
+class Empire(val name: String) {
+    var gold = STARTING_GOLD
+    val provinces = arrayListOf<Province>()
     val regiments = arrayListOf<Regiment>()
     private val selectedRegiments = arrayListOf<Regiment>()
 
     /**
      * Throws IllegalStateException if the Empire does not have enough gold.
      */
-    fun trainRegiment(province: Province) {
+    fun orderTrainRegiment(province: Province) {
         if (gold < TRAINING_COST) {
             throw IllegalStateException("Not enough gold: $gold")
         }
         gold -= TRAINING_COST
-        val regiment = Regiment(this, province)
-        regiments.add(regiment)
-        province.regiments.add(regiment)
+        province.orderTrainRegiment()
     }
 
     fun selectRegiment(regiment: Regiment) {
@@ -43,5 +44,15 @@ class Empire(private val name: String) {
     fun disbandSelectedRegiments() {
         selectedRegiments.forEach { it.disband() }
         selectedRegiments.clear()
+    }
+
+    fun combatUnderpaidPenalty(): Double {
+        return if (gold >= 0) {
+            1.0
+        } else {
+            val missingGold = -gold
+            val totalMaintenanceCost = regiments.size * UPKEEP_COST
+            1.0 - missingGold / totalMaintenanceCost
+        }
     }
 }

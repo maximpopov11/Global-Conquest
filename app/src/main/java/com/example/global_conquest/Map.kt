@@ -3,8 +3,8 @@ package com.example.global_conquest
 import android.content.Context
 
 class Map(private val context: Context, private val mapDirectoryPath: String) {
-    private val provinces = arrayListOf<Province>()
-    private val empires = arrayListOf<Empire>()
+    val provinces = arrayListOf<Province>()
+    val empires = arrayListOf<Empire>()
 
     init {
         createProvinces()
@@ -38,9 +38,11 @@ class Map(private val context: Context, private val mapDirectoryPath: String) {
             val parts = line.split(',')
             val name = parts[0]
             val provinceId = parts[1].toInt()
+            val province = provinces[provinceId]
             val empire = Empire(name)
             empires.add(empire)
-            provinces[provinceId].empire = empire
+            empire.provinces.add(province)
+            province.empire = empire
         }
     }
 }
