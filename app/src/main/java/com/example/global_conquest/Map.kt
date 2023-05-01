@@ -41,7 +41,6 @@ class Map(private val context: Context, private val mapDirectoryPath: String) {
             val province = provinces[provinceId]
             val empire = Empire(name)
             empires.add(empire)
-            empire.provinces.add(province)
             province.empire = empire
         }
     }
