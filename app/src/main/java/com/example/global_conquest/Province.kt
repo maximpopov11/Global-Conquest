@@ -30,6 +30,8 @@ class Province(private val name: String) {
             casualtiesMap.forEach { (empire, casualties) -> issueCasualties(empire, casualties)}
             pruneDefeatedEmpires()
         }
+        // Update controlling empire
+        empire = regiments.entries.first().key
     }
 
     private fun fillCasualtiesMap(casualtiesMap: HashMap<Empire, Double>, empire: Empire,
