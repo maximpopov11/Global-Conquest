@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createGame() {
-        val map = Map(this, "maps/test/")
+        val map = Map(this, "maps/small_europe/")
         val game = Game(map)
     }
 }
