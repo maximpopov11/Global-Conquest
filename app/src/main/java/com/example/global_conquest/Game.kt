@@ -61,19 +61,19 @@ class Game(private val map: Map) {
     }
 
     private fun gameWon(empire: Empire) {
-        println(empire.name + " won on turn " + turn + "!")
+        println("${empire.name} won on turn $turn!")
     }
 
     private fun defeatCheck() {
         map.empires.forEach {
-            if (it.provinces.size == 0) {
+            if (it.provinces.size == 0 && it.regiments.size == 0) {
                 gameLost(it)
             }
         }
     }
 
     private fun gameLost(empire: Empire) {
-        println(empire.name + " was defeated on turn " + turn + "!")
+        println("${empire.name} was defeated on turn $turn!")
     }
 
     private fun bailDebt() {
