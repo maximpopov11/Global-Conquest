@@ -6,43 +6,45 @@ from collections import deque
 
 
 class DQNAgent:
-    def __init__(self, env, state_space_size, action_space_size, learning_rate=0.001, discount_factor=0.99,
+    # TODO: walk through ALL code and ensure full implementation of all called functions
+    def __init__(self, state, num_features, action_space, num_actions, learning_rate=0.001, discount_factor=0.99,
                  batch_size=64, memory_size=100000, exploration_rate=1.0, exploration_decay_rate=0.99995):
-        self.env = env
-        self.state_space_size = state_space_size
-        self.action_space_size = action_space_size
+        self.state = state
+        self.num_features = num_features
+        self.action_space = action_space
+        self.num_actions = num_actions
         self.discount_factor = discount_factor
         self.batch_size = batch_size
         self.exploration_rate = exploration_rate
         self.exploration_decay_rate = exploration_decay_rate
         self.memory = deque(maxlen=memory_size)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.q_network = self.build_model().to(self.device)
+        self.q_network = self.__build_model().to(self.device)
         self.optimizer = optim.Adam(self.q_network.parameters(), lr=learning_rate)
 
-    def build_model(self):
+    def __build_model(self):
         model = nn.Sequential(
-            nn.Linear(self.state_space_size, 128),
+            nn.Linear(self.num_features, 128),
             nn.ReLU(),
             nn.Linear(128, 128),
             nn.ReLU(),
-            nn.Linear(128, self.action_space_size)
+            nn.Linear(128, self.num_actions)
         )
         return model
 
-    def remember(self, state, action, reward, next_state, done):
+    def __remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
-    def get_action(self, state):
+    def __get_action(self, state):
         if random.uniform(0, 1) < self.exploration_rate:
-            return random.randrange(self.action_space_size)
+            return random.randrange(self.action_space)
         else:
             with torch.no_grad():
                 state = torch.tensor(state).float().unsqueeze(0).to(self.device)
                 q_values = self.q_network(state)
                 return q_values.argmax().item()
 
-    def learn(self, batch_size, discount_factor):
+    def __learn(self, batch_size, discount_factor):
         minibatch = random.sample(self.memory, batch_size)
         states_batch, action_batch, reward_batch, next_states_batch, done_batch = zip(*minibatch)
 
@@ -67,38 +69,69 @@ class DQNAgent:
         loss.backward()
         self.optimizer.step()
 
-    def update_target_network(self):
+    def __update_target_network(self):
         self.q_network.load_state_dict(self.q_network.state_dict())
 
     def train(self, num_episodes=1000, max_steps_per_episode=1000, target_update_frequency=10):
         # Loop over episodes
         for i in range(num_episodes):
             # Reset environment and get initial state
-            state = self.env.reset()
+            state = self.state.reset()
             # Reset flag and start iterating until episode ends
             done = False
             total_reward = 0
             step = 0
             while not done and step < max_steps_per_episode:
                 # Determine next action
-                action = self.get_action(state)
+                action = self.__get_action(state)
                 # Take action and observe reward and next state
-                next_state, reward, done, _ = self.env.step(action)
+                next_state, reward, done = self.state.step(action)
                 # Remember the transition
-                self.remember(state, action, reward, next_state, done)
+                self.__remember(state, action, reward, next_state, done)
                 # Update the DQN agent
                 if len(self.memory) > self.batch_size:
-                    self.learn(self.batch_size, self.discount_factor)
+                    self.__learn(self.batch_size, self.discount_factor)
                 # Update the total reward and state
                 total_reward += reward
                 state = next_state
                 step += 1
                 # Update the target network
                 if step % target_update_frequency == 0:
-                    self.update_target_network()
+                    self.__update_target_network()
                 # Decay epsilon
                 self.exploration_rate *= self.exploration_decay_rate
             # Print the episode's results
             print("Episode {}: Total Reward = {}, Steps = {}".format(i + 1, total_reward, step))
 
         torch.save(self.q_network.state_dict(), 'model.pt')
+
+
+class Env:
+    def __init__(self):
+        self.state = self.reset()
+        self.done = False
+
+    def reset(self):
+        # TODO: obtain state and features from Kotlin code and set actions
+        pass
+
+    def step(self, action):
+        self.state, self.reward, self.done = self.__update_state(action)
+        return self.state, self.reward, self.done
+
+    def __update_state(self, action):
+        # TODO: obtain updated state given action from Kotlin code
+        pass
+
+
+def main():
+    env = Env()
+    num_features = len(env)
+    action_space = env.actions
+    action_space_size = len(action_space)
+    agent = DQNAgent(env.state, num_features, action_space, action_space_size)
+    agent.train()
+
+
+if __name__ == "__main__":
+    main()
